@@ -37,7 +37,7 @@ const logAll=function(request,response,next){
     logger.info(`URL being  requested: ${request.url}`);
     next();
 }
-//app.use(logAll);
+app.use(logAll);
 
 // MongoDB setup
 dotenv.config();
