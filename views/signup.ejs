@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SignUp CineQuest</title>
+        <link rel="stylesheet" type="text/css" href="/styles.css">
+        <link rel="icon" href="/cinequest.png" type="image/png">
+        <div id="css-test" style="display: none;"></div>
+        <script>
+            if(localStorage.getItem('darkMode') === 'true'){
+              document.documentElement.classList.add('dark-mode');
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container">
+
+            <!-- Logo & Tilte -->
+            <div class="header">
+                <div class="logo">
+                    <a href="/movies">
+                        <img src="/cinequest.png" 
+                            alt="cinequest_logo">
+                    </a>
+                </div>
+                <div class="text">
+                    <h1>CineQuest</h1>
+                    <h4>Movies Beyond Imagination</h4>
+                </div>
+                <button id="darkModeToggle" class="dark-mode-button">🌙</button>
+            </div>
+
+            <!-- Form -->
+            <div class="form-container"> 
+                <form action="/signup" method="POST">
+                    <input type="text" 
+                            name="username" 
+                            placeholder="Choose Username" required>
+                    <input type="password" 
+                            name="password" 
+                            placeholder="Choose Password" 
+                            minlength="6" required>
+                    
+                    <input type="password" 
+                            name="confirmPassword" 
+                            placeholder="Confirm Password" 
+                            minlength="6" required>
+                    <button type="submit">Signup</button>
+                </form>
+                  
+                <p>Already have an account? <a href="/login">Login</a></p>
+            </div>
+
+            <!--Message -->
+            <% if(errorMessage){ %>
+                <div class="error-message"><%= errorMessage %></div>
+                <script>
+                    window.history.replaceState(null, '', window.location.pathname);
+                </script>
+            <% } %>
+            <button class="back-button" onclick="goBack()">← Back</button>
+        </div>
+        <script type="module"> 
+            import { toggleDarkMode, goBack, checkAndReloadCSS } from "/functions.js";
+            
+            toggleDarkMode();
+            checkAndReloadCSS();
+            
+            window.goBack = goBack;
+        </script>
+    </body>
+</html>
+  

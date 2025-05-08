@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>My Profile - CineQuest</title>
+        <link rel="icon" href="/cinequest.png" type="image/png">
+        <link rel="stylesheet" href="/styles.css">
+        <div id="css-test" style="display: none;"></div>
+        <script>
+            if(localStorage.getItem('darkMode') === 'true'){
+              document.documentElement.classList.add('dark-mode');
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container">
+
+            <!-- Logo Tilte Profile -->
+            <div class="header">
+                <div class="logo">
+                    <a href="/movies">
+                        <img src="/cinequest.png" alt="cinequest_logo">
+                    </a>
+                </div>
+                <div class="text">
+                    <h1>My Profile</h1>
+                </div>
+                <button id="darkModeToggle" class="dark-mode-button">🌙</button>
+
+                <!-- Profile -->
+                <div class="auth-button">
+                    <% if(user){ %>                       
+                        <div class="profile-dropdown">
+                            <div class="profile-header">
+                                <img src="/user_icon.png" alt="User Icon" class="user-icon">
+                                <span><%= user.username %></span>
+                                <i class="arrow-down"></i>
+                            </div>
+                            <div class="dropdown-content">
+                                <a href="/profile">Profile Settings</a>
+                                <a href="/favorites">Favorites</a>
+                                <a href="/my-reviews">My Reviews</a>
+                                <a href="/logout">Logout</a>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Profile actions -->
+            <div class="profile-container">
+                <img src="/user_icon.png" alt="User Icon" class="user-profile-icon">
+                <h2>Welcome, <%= user.username %>!</h2>
+                <p><strong>Favorites:</strong> <%= favoritesCount %> Movies</p>
+
+                <div class="profile-actions">
+                    <a href="/favorites" class="profile-button">View Favorites</a>
+                    <a href="/my-reviews" class="profile-button">My Reviews</a>
+                </div>
+                <div class="profile-actions">
+                    <a href="/change-password" class="profile-button">Change Password</a>
+                </div>
+                <div class="profile-actions-delete">
+                    <form action="/delete-account" method="POST" onsubmit="return confirmDelete();" style="display: inline;">
+                        <button type="submit" class="profile-button delete">Delete Account</button>
+                    </form>
+                </div>
+                <div class="profile-actions-logout">
+                    <a href="/logout" class="profile-button logout">Logout</a>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="messages">
+                <% if(successMessage){ %>
+                    <div class="success-message"><%= successMessage %></div>
+                <% } %>
+                <% if(errorMessage){ %>
+                    <div class="error-message"><%= errorMessage %></div>
+                <% } %>
+
+                <% if(successMessage || errorMessage){ %>
+                <script>
+                    window.history.replaceState(null, '', window.location.pathname);
+                </script>
+                <% } %>
+            </div>
+            <button class="back-button" onclick="goBack()">← Back</button>
+        </div>
+        <script type="module"> 
+            import { toggleDarkMode, goBack, confirmDelete, 
+                    autoHideMessages, checkAndReloadCSS } from "/functions.js";
+
+            toggleDarkMode();
+            autoHideMessages();
+            checkAndReloadCSS();
+            
+            window.goBack = goBack;
+            window.confirmDelete = confirmDelete;
+        </script>
+    </body>
+</html>
