@@ -108,7 +108,6 @@ app.use((req, res, next) => {
 // Start server after DB connects
 connectToDB()
 .then(() => {
-
     //Routes
     app.use('/', createMovieRouter(moviesCollection, usersCollection));
     app.use('/', createFavoritesRoutes(usersCollection, moviesCollection));
@@ -136,10 +135,6 @@ connectToDB()
 .catch((error) => {
     console.error('MongoDB connection failed. Server not started.', error);
     process.exit(1);
-});
-
-app.get('/', (req, res) => {
-  res.send('CineQuest backend is running!');
 });
 
 //debugging
