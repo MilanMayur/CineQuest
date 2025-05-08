@@ -117,7 +117,7 @@ connectToDB()
 
     //Server
     app.listen(PORT, () => {
-        console.log(`Server running at http://localhost:${PORT}`);
+        console.log(`Server running at port:${PORT}`);
     });
 
     //Global error handler
@@ -136,6 +136,10 @@ connectToDB()
 .catch((error) => {
     console.error('MongoDB connection failed. Server not started.', error);
     process.exit(1);
+});
+
+app.get('/', (req, res) => {
+  res.send('CineQuest backend is running!');
 });
 
 //debugging
