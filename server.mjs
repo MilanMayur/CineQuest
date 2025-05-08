@@ -108,6 +108,10 @@ app.use((req, res, next) => {
 // Start server after DB connects
 connectToDB()
 .then(() => {
+    app.get('/', (req, res) => {
+        res.redirect('/movies');
+    });
+    
     //Routes
     app.use('/', createMovieRouter(moviesCollection, usersCollection));
     app.use('/', createFavoritesRoutes(usersCollection, moviesCollection));
