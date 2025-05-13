@@ -1,9 +1,9 @@
 export function getSortOption(sort) {
     switch (sort) {
-        case 'title': return { title: 1 };
-        case 'rating': return { sortField: { 'imdb.rating': -1 }, isNumericRating: true };
-        case 'year': return { released: -1 };
-        default: return {};
+        case 'title': return { sortOption: { title: 1 }, isNumericRating: false };
+        case 'rating': return { sortOption: { 'imdb.rating': -1 }, isNumericRating: true };
+        case 'year': return { sortOption: { released: -1 }, isNumericRating: false };
+        default: return { sortOption: { released: -1 }, isNumericRating: false };
     }
 }
 
