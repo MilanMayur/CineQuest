@@ -14,69 +14,70 @@
     </head>
     <body>
         <div class="container">
+            <div class="page-body">
 
-            <!-- Logo Title Profile -->
-            <div class="header">
-                <div class="logo">
-                    <a href="/movies">
-                        <img src="/cinequest.png" alt="cinequest_logo">
-                    </a>
-                </div>
-                <div class="text">
-                    <h1>My Favorite Movies</h1>
-                </div>
-                <button id="darkModeToggle" class="dark-mode-button">🌙</button>
-
-                <!-- Profile -->
-                <div class="auth-button">
-                    <% if(user){ %>                       
-                        <div class="profile-dropdown">
-                            <div class="profile-header">
-                                <img src="/user_icon.png" alt="User Icon" class="user-icon">
-                                <span><%= user.username %></span>
-                                <i class="arrow-down"></i>
-                            </div>
-                            <div class="dropdown-content">
-                                <a href="/profile">Profile Settings</a>
-                                <a href="/favorites">Favorites</a>
-                                <a href="/my-reviews">My Reviews</a>
-                                <a href="/logout">Logout</a>
-                            </div>
-                        </div>
-                    <% } %>
-                </div>  
-            </div>
-            
-            <!-- Favorites -->
-            <div class="favorites">
-                <% if(favorites.length > 0){ %>
-                    <div class="movie-grid">
-                        <% favorites.forEach(movie => { %>
-                            <div class="movie-card">
-                                <a href="/movie/<%= movie._id %>">
-                                    <img src="<%= movie.image.startsWith('http') ? movie.image : '/image_not_found.png' %>" 
-                                        alt="<%= movie.movieName %>">
-                                    <p><strong>IMDb:</strong> <%= movie.imdbRating %></p>
-                                    <h2><%= movie.movieName %></h2>
-                                </a>
-                            </div>
-                        <% }) %>
+                <!-- Logo Title Profile -->
+                <div class="header">
+                    <div class="logo">
+                        <a href="/home">
+                            <img src="/cinequest.png" alt="cinequest_logo">
+                        </a>
                     </div>
-                <% } 
-                else{ %>
-                    <p>No favorites yet!</p>
+                    <div class="text">
+                        <h1>My Favorite Movies</h1>
+                    </div>
+                    <button id="darkModeToggle" class="dark-mode-button">🌙</button>
+
+                    <!-- Profile -->
+                    <div class="auth-button">
+                        <% if(user){ %>                       
+                            <div class="profile-dropdown">
+                                <div class="profile-header">
+                                    <img src="/user_icon.png" alt="User Icon" class="user-icon">
+                                    <span><%= user.name %></span>
+                                    <i class="arrow-down"></i>
+                                </div>
+                                <div class="dropdown-content">
+                                    <a href="/profile">Profile Settings</a>
+                                    <a href="/favorites">Favorites</a>
+                                    <a href="/my-reviews">My Reviews</a>
+                                    <a href="/logout">Logout</a>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>  
+                </div>
+            
+                <!-- Favorites -->
+                <div class="favorites">
+                    <% if(favorites.length > 0){ %>
+                        <div class="movie-grid">
+                            <% favorites.forEach(movie => { %>
+                                <div class="movie-card">
+                                    <a href="/movie/<%= movie._id %>">
+                                        <img src="<%= movie.poster?.startsWith('http') ? movie.poster : '/image_not_found.png' %>"
+                                            alt="<%= movie.title %>">
+                                        <p><strong>IMDb:</strong> <%= movie.imdb?.rating || 'N/A' %></p>
+                                        <h2><%= movie.title %></h2>
+                                    </a>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } 
+                    else{ %>
+                        <p>No favorites yet!</p>
+                    <% } %>
+                </div>
+
+                <!-- Pagination -->
+                <% if(totalPages > 1){ %>
+                    <div class="pagination">
+                        <% for(let i = 1; i <= totalPages; i++){ %>
+                            <a href="/favorites?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                        <% } %>
+                    </div>
                 <% } %>
             </div>
-
-            <!-- Pagination -->
-            <% if(totalPages > 1){ %>
-                <div class="pagination">
-                    <% for(let i = 1; i <= totalPages; i++){ %>
-                        <a href="/favorites?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
-                    <% } %>
-                </div>
-            <% } %>
-            
             <button class="back-button" onclick="goBack()">← Back</button>
         </div>
         <script type="module"> 
