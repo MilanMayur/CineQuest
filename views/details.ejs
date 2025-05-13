@@ -17,7 +17,7 @@
             <!-- Logo Title Profile -->
             <div class="header">
                 <div class="logo">
-                    <a href="/movies">
+                    <a href="/home">
                         <img src="/cinequest.png" 
                             alt="cinequest_logo">
                     </a>
@@ -34,7 +34,7 @@
                         <div class="profile-dropdown">
                             <div class="profile-header">
                                 <img src="/user_icon.png" alt="User Icon" class="user-icon">
-                                <span><%= user.username %></span>
+                                <span><%= user.name %></span>
                                 <i class="arrow-down"></i>
                             </div>
                             <div class="dropdown-content">
@@ -55,7 +55,7 @@
 
             <!-- Search Bar -->
             <div class="search-box">
-                <a href="/movies" class="home-button">Home</a>
+                <a href="/home" class="home-button">Home</a>
                 <form action="/search" 
                         method="GET" 
                         class="movie-search-bar" 
@@ -70,12 +70,11 @@
 
             <!-- Movie Details -->
             <div class="movie-details-full">
-                <img src="<%= movie.image.startsWith('http') ? movie.image : '/image_not_found.png' %>" 
-                    alt="<%= movie.movieName %>">
-                <h1><%= movie.movieName %></h1>
+                <img src="<%= movie.poster || '/image_not_found.png' %>" alt="<%= movie.title %>">
+                <h1><%= movie.title %></h1>
 
                 <!-- Add to fav -->
-                <% if (user) { %>
+                <% if(user){ %>
                     <form id="favForm" style="margin: 5px 0;">
                         <input type="hidden" 
                                 name="movieId" 
@@ -97,33 +96,42 @@
 
                 <!-- Movie info -->
                 <div class="movie-info">
-                    <p><strong>Language:</strong> <%= movie.language %></p>
-                    <p><strong>Release Date:</strong> <%= movie.releaseDate %></p>
-                    <p><strong>Actors:</strong> <%= movie.leadActors %></p>
-                    <p><strong>Director:</strong> <%= movie.director %></p>
-                    <p><strong>Genre:</strong> <%= movie.genre %></p>
-                    <p><strong>IMDB Rating:</strong> <%= movie.imdbRating %></p>
-                    <p><strong>Public Rating:</strong> <%= movie.publicRating %></p>
+                    <p><strong>Language:</strong> <%= movie.languages?.join(', ') %></p>
+                    <p><strong>Genre:</strong> <%= movie.genres?.join(', ') %></p>
+                    <p><strong>Runtime:</strong> <%= movie.runtime %> minutes</p>
+                    <p><strong>Released:</strong> <%= movie.released ? new Date(movie.released).toDateString() : 'N/A' %></p>
+                    <p><strong>Cast:</strong> <%= movie.cast?.join(', ') %></p>
+                    <p><strong>Director(s):</strong> <%= movie.directors?.join(', ') %></p>
+                    <p><strong>IMDB Rating:</strong> <%= movie.imdb?.rating || 'N/A' %> (<%= movie.imdb?.votes || 0 %> votes)</p>
+                    <p><strong>Tomatoes Viewer Rating:</strong> <%= movie.tomatoes?.viewer?.rating || 'N/A' %></p>
+                    <p><strong>Critic Rating:</strong> <%= movie.tomatoes?.critic?.rating || 'N/A' %></p>
                 </div>
                 <div class="movie-description">
                     <label><strong>Description:</strong></label>
-                    <p><%= movie.description %></p>
+                    <p><%= movie.fullplot || movie.plot || 'No description available.' %></p>
                 </div>
 
                 <!-- User review form -->
                 <% if(user){ %>
-                    <form action="/movies/<%= movie._id %>/review" method="POST" class="review-form" autocomplete="off">
-                        <label for="rating"> Your Rating:</label>
+                    <form action="/movies/<%= movie._id %>/review" method="POST" 
+                        class="review-form" autocomplete="off">
+                        <label> Your Rating:</label>
                         <div class="star-rating">
-                            <input type="hidden" name="rating" id="ratingInput" value="0" autocomplete="off">
-                            <button type="button" class="star" data-value="1">★</button>
-                            <button type="button" class="star" data-value="2">★</button>
-                            <button type="button" class="star" data-value="3">★</button>
-                            <button type="button" class="star" data-value="4">★</button>
-                            <button type="button" class="star" data-value="5">★</button>
+                            <input type="hidden" 
+                                    name="rating" 
+                                    id="ratingInput" 
+                                    value="0" 
+                                    autocomplete="off">
+                            <% for(let i = 1; i <= 5; i++){ %>
+                                <button type="button" class="star" data-value="<%= i %>">★</button>
+                            <% } %>
                         </div>
                         <label for="reviewText">Your Review:</label>
-                        <textarea name="review" id="reviewText" rows="5" maxlength="500" required autocomplete="off"></textarea>
+                            <textarea name="review" 
+                                        id="reviewText" 
+                                        rows="5" 
+                                        maxlength="500"  
+                                        autocomplete="off" required></textarea>
                         <div class="submit-container">
                             <button type="submit">Submit Review</button>
                         </div>
@@ -153,14 +161,18 @@
                         <div class="review">
                             <div class="review-header">
                                 <div class="review-user">
-                                    <strong><%= review.username %></strong> - <%= review.rating %>/5★
+                                    <strong><%= review.name %></strong> - <%= review.rating %>/5★
                                 </div>
                                 <div class="review-time">
                                     <small><%= new Date(review.date).toLocaleString() %></small>
-                                    <% if (user && user.username === review.username) { %>
-                                        <form action="/movies/<%= movie._id %>/review/delete" method="POST" class="delete-review-form">
-                                            <input type="hidden" name="reviewIndex" value="<%= index %>">
-                                            <button type="submit" class="delete-button" title="Delete Review">🗑️</button>
+                                    <% if (user && user.name === review.name) { %>
+                                        <form action="/movies/<%= movie._id %>/review/delete" 
+                                            method="POST" class="delete-review-form">
+                                            <input type="hidden" 
+                                                    name="reviewIndex" 
+                                                    value="<%= index %>">
+                                            <button type="submit" class="delete-button" 
+                                                    title="Delete Review">🗑️</button>
                                         </form>
                                     <% } %>
                                 </div>
