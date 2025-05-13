@@ -8,6 +8,7 @@ export function createFavoritesRoutes(usersCollection, moviesCollection) {
     
     favoritesRoutes.get('/favorites', async (req, res, next) => {
         try{
+
             if(!req.session.user) return res.redirect('/login');
 
             res.set({
@@ -16,7 +17,7 @@ export function createFavoritesRoutes(usersCollection, moviesCollection) {
                 'Expires': '0'
             });        
 
-            const userData = await usersCollection.findOne({ username: req.session.user.username });
+            const userData = await usersCollection.findOne({ email: req.session.user.email });
 
             const allFavorites = userData?.favorites || [];
             const totalFavorites = allFavorites.length;
@@ -65,10 +66,12 @@ export function createFavoritesRoutes(usersCollection, moviesCollection) {
 
             //console.log('Received movieId:', movieId);//debug
 
-            await usersCollection.updateOne(
-                { username: req.session.user.username },
+            const result = await usersCollection.updateOne(
+                { email: req.session.user.email },
                 { $addToSet: { favorites: movieId } }
             );
+
+            //console.log(result);//debug
   
             return res.json({ success: true, message: 'Movie added to favorites' });
         }
@@ -89,7 +92,7 @@ export function createFavoritesRoutes(usersCollection, moviesCollection) {
             //console.log('Received movieId to remove:', movieId);//debug
 
             await usersCollection.updateOne(
-                                { username: req.session.user.username },
+                                { email: req.session.user.email },
                                 { $pull: { favorites: movieId } } 
             );
 
