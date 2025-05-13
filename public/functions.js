@@ -148,20 +148,6 @@ export function updateFilterButtonState(){
     document.getElementById('applyFilterButton').disabled = !(year || rating);
 }
 
-/*export function applyFilters(){
-    const year = document.getElementById('yearFilter').value.trim();
-    const rating = document.getElementById('ratingFilter').value.trim();
-    const queryParams = [];
-    if(year){
-        queryParams.push(`year=${encodeURIComponent(year)}`);
-    }
-    if(rating){
-        queryParams.push(`rating=${encodeURIComponent(rating)}`);
-    }
-    const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
-    window.location.href = '/filter' + queryString;
-}*/
-
 export function applyFilters() {
     const urlParams = new URLSearchParams(window.location.search);
     const year = document.getElementById('yearFilter').value.trim();
@@ -232,39 +218,4 @@ export function checkAndReloadCSS() {
     }
 }
 
-/*export function setupReviewForm() {
-    const reviewForm = document.querySelector('.review-form');
-    if(!reviewForm) return;
-
-    reviewForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const formData = new FormData(reviewForm);
-        const rating = formData.get('rating');
-        const comment = formData.get('review');
-        const movieId = window.location.pathname.split('/').pop();
-
-        try{
-            const res = await fetch(`/movies/${movieId}/review`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ rating, review: comment })
-            });
-
-            const data = await res.json();
-
-            const msgBox = document.createElement('div');
-            //const msgBox = document.querySelector('.success-message');
-            msgBox.className = data.success ? 'success-message' : 'error-message';
-            msgBox.innerText = data.message;
-            document.body.prepend(msgBox);
-            setTimeout(() => msgBox.remove(), 3000);
-
-            if(data.success) reviewForm.reset();
-        }
-        catch(error){
-            console.error('Review error:', error);
-        }
-    });
-}*/
 
