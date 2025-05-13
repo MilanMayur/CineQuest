@@ -288,13 +288,45 @@ export function createMovieRouter(moviesCollection, usersCollection) {
 
             const filter = filterConditions.length ? { $and: filterConditions } : {};
 
-            const sortOption = getSortOption(sort);
+            //const sortOption = getSortOption(sort);
+            const { sortOption, isNumericRating } = getSortOption(sort);
 
-            const movieData = await moviesCollection.find(filter)
+            if (isNumericRating) {
+        movieData = await moviesCollection.aggregate([
+            { $match: filter },
+            {
+                $addFields: {
+                    numericRating: {
+                        $cond: {
+                            if: {
+                                $and: [
+                                    { $ne: [{ $ifNull: ['$imdb.rating', ''] }, ''] },
+                                    { $ne: ['$imdb.rating', 'N/A'] }
+                                ]
+                            },
+                            then: { $toDouble: '$imdb.rating' },
+                            else: null
+                        }
+                    }
+                }
+            },
+            { $sort: sortField },
+            { $skip: skip },
+            { $limit: itemsPerPage }
+        ]).toArray();
+    } else {
+        movieData = await moviesCollection.find(filter)
+            .sort(sortField)
+            .skip(skip)
+            .limit(itemsPerPage)
+            .toArray();
+    }
+
+            /*const movieData = await moviesCollection.find(filter)
                                                     .sort(sortOption)
                                                     .skip(skip)
                                                     .limit(itemsPerPage)
-                                                    .toArray();
+                                                    .toArray();*/
 
             const totalMovies = await moviesCollection.countDocuments(filter);
 
