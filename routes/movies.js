@@ -277,56 +277,21 @@ export function createMovieRouter(moviesCollection, usersCollection) {
             if(year) filterConditions.push({ released: { $regex: year } });
             if(rating){
                 filterConditions.push({
-                    $and: [
-                        { 'imdb.rating': { $ne: '' } },
-                        { $expr: { $gte: [
-                                { $toDouble: '$imdb.rating' },
-                                parseFloat(rating) ]}}
-                    ]
+                    'imdb.rating': { not: { $in: ['', 'N/A', null] },
+                                     $gte: rating
+                                   }
                 });
             }
 
             const filter = filterConditions.length ? { $and: filterConditions } : {};
 
-            //const sortOption = getSortOption(sort);
-            const { sortOption, isNumericRating } = getSortOption(sort);
+            const sortOption = getSortOption(sort);
 
-            if (isNumericRating) {
-        movieData = await moviesCollection.aggregate([
-            { $match: filter },
-            {
-                $addFields: {
-                    numericRating: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    { $ne: [{ $ifNull: ['$imdb.rating', ''] }, ''] },
-                                    { $ne: ['$imdb.rating', 'N/A'] }
-                                ]
-                            },
-                            then: { $toDouble: '$imdb.rating' },
-                            else: null
-                        }
-                    }
-                }
-            },
-            { $sort: sortField },
-            { $skip: skip },
-            { $limit: itemsPerPage }
-        ]).toArray();
-    } else {
-        movieData = await moviesCollection.find(filter)
-            .sort(sortField)
-            .skip(skip)
-            .limit(itemsPerPage)
-            .toArray();
-    }
-
-            /*const movieData = await moviesCollection.find(filter)
+            const movieData = await moviesCollection.find(filter)
                                                     .sort(sortOption)
                                                     .skip(skip)
                                                     .limit(itemsPerPage)
-                                                    .toArray();*/
+                                                    .toArray();
 
             const totalMovies = await moviesCollection.countDocuments(filter);
 
