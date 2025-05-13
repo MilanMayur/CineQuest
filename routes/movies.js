@@ -3,23 +3,25 @@ import { ObjectId } from 'mongodb';
 import { getSortOption } from '../utils/utils.js';
 
 
-export function createMovieRouter(moviesCollection, usersCollection) {
+export function createMovieRouter(moviesCollection, usersCollection, commentsCollection) {
     
     const movieRoutes = express.Router();
 
-    movieRoutes.get('/movies', async (req, res) => {
+    movieRoutes.get('/home', async (req, res) => {
         try {
-            const successMessage = req.cookies.successMessage ||req.session.successMessage || null;
+            const successMessage = req.cookies.successMessage || res.locals.successMessage || null;
             res.clearCookie('successMessage');
-            const errorMessage = req.session.errorMessage || null;
+            const errorMessage = res.locals.errorMessage || null;
+
+            //console.log('In /home- successMessage: ', successMessage);//debug
+            //console.log('In /home- errorMessage: ', errorMessage);//debug
 
             const page = parseInt(req.query.page) || 1;
-            let year = '', rating = '', sort = '';
-            const itemsPerPage = 15;
+            const itemsPerPage = 20;
             const skip = (page - 1) * itemsPerPage;
             const totalMovies = await moviesCollection.countDocuments();
             const movieData = await moviesCollection.find()
-                                    .sort({ releaseDate: -1 })
+                                    .sort({ released: -1 })
                                     .skip(skip)
                                     .limit(itemsPerPage)
                                     .toArray();
@@ -30,17 +32,19 @@ export function createMovieRouter(moviesCollection, usersCollection) {
                             totalPages: Math.ceil(totalMovies / itemsPerPage),
                             resultCount: totalMovies,
                             fromFilter: false,
-                            year,
-                            rating,
-                            sort,
+                            year: '',
+                            rating: '',
+                            sort: '',
                             searchTerm: '',
                             query: req.query,
                             currentPath: req.path,
-                            user: req.session.user
+                            user: req.session.user,
+                            successMessage,
+                            errorMessage
             });
         } 
         catch(error){
-            console.error('Error in /movies', error);
+            console.error('Error in /home', error);
             res.status(500).send("Error fetching movies: " + error.message);
         }
     });
@@ -71,18 +75,18 @@ export function createMovieRouter(moviesCollection, usersCollection) {
             let alreadyFavorited = false;
 
             if(req.session.user){
-                const userData = await usersCollection.findOne({ username: req.session.user.username });
+                const userData = await usersCollection.findOne({ email: req.session.user.email });
                 userFavorites = userData?.favorites || [];
                 alreadyFavorited = userFavorites.includes(movie._id.toString());
             }
 
-            req.session.prevPage = req.get('Referrer') || '/movies';
+            req.session.prevPage = req.get('Referrer') || '/home';
 
             res.status(200).set({'Content-Type': 'text/html'}).render('details', { 
                             movie, 
                             user: req.session.user,
                             alreadyFavorited,
-                            backUrl: req.query.from || '/movies' 
+                            backUrl: req.query.from || '/home' 
             });
         }
         catch(error){
@@ -103,11 +107,11 @@ export function createMovieRouter(moviesCollection, usersCollection) {
 
             const { rating, review } = req.body;
             const movieId = req.params.id;
-            const username = req.session.user.username;
+            const email = req.session.user.email;
 
             const movie = await moviesCollection.findOne({ _id: new ObjectId(movieId) });
 
-            const alreadyReviewed = movie.reviews?.some(r => r.username === username);
+            const alreadyReviewed = movie.reviews?.some(rev => rev.email === email);
 
             if(alreadyReviewed){
                 req.session.errorMessage = "You have already submitted a review for this movie.";
@@ -115,7 +119,8 @@ export function createMovieRouter(moviesCollection, usersCollection) {
             }
 
             const newReview = {
-                            username,
+                            name: req.session.user.name,
+                            email,
                             rating: parseInt(rating),
                             comment: review,
                             date: new Date()
@@ -127,7 +132,8 @@ export function createMovieRouter(moviesCollection, usersCollection) {
             );
 
             req.session.successMessage = "Review submitted successfully!";
-            res.redirect(req.session.lastPage || `/movie/${movieId}`);
+            //console.log(req.session.lastPage);//debug
+            return res.redirect(req.session.lastPage || `/movie/${movieId}`);
         } 
         catch(error){
             error.message = 'Error submitting review';
@@ -147,14 +153,17 @@ export function createMovieRouter(moviesCollection, usersCollection) {
         
             const movieId = req.params.id;
             const reviewIndex = parseInt(req.body.reviewIndex);
+            const email = req.session.user.email;
         
             const movie = await moviesCollection.findOne({ _id: new ObjectId(movieId) });
-            if(!movie || !movie.reviews || !movie.reviews[reviewIndex]) {
+            const review = movie.reviews[reviewIndex];
+
+            if(!movie || !movie.reviews || !review){
                 req.session.errorMessage = 'Review not found!';
                 return res.redirect('/movies');
             }
         
-            if(movie.reviews[reviewIndex].username !== req.session.user.username){
+            if(review.email !== email){
                 req.session.errorMessage = 'You can only delete your own reviews.';
                 return res.redirect(`/movie/${movieId}`);
             }
@@ -193,24 +202,25 @@ export function createMovieRouter(moviesCollection, usersCollection) {
             const searchResult = (req.params.query)?.toLowerCase() || "";
             const words = searchResult.trim().split(/\s+/);
             const { year, rating, sort = '', page = 1, query } = req.query;
-            const itemsPerPage = 15;
+            const itemsPerPage = 20;
             const skip = (page - 1) * itemsPerPage;
 
             //console.log("Sort param received:", sort);//debug
 
             const wordFilters = words.map(word => ({
                 $or: [
-                    { movieName: { $regex: word, $options: "i" } },
-                    { leadActors: { $regex: `\\b${word}\\b`, $options: "i" } },
-                    { genre: { $regex: `\\b${word}\\b`, $options: "i" } }
+                    { title: { $regex: word, $options: "i" } },
+                    { cast: { $regex: `\\b${word}\\b`, $options: "i" } },
+                    { genres: { $regex: `\\b${word}\\b`, $options: "i" } },
+                    { directors: { $regex: `\\b${word}\\b`, $options: "i" } }
                 ]
             }));
 
             const searchFilter = { $or: wordFilters };
 
             if(year || rating) searchFilter.$and = [];
-            if(year) searchFilter.$and.push({ releaseDate: { $regex: year } });
-            if(rating) searchFilter.$and.push({ imdbRating: { $gte: parseFloat(rating) } });
+            if(year) searchFilter.$and.push({ released: { $regex: year } });
+            if(rating) searchFilter.$and.push({ 'imdb.rating': { $gte: parseFloat(rating) } });
 
             const sortOption = getSortOption(sort);
             const movieData = await moviesCollection.find(searchFilter)
@@ -220,7 +230,9 @@ export function createMovieRouter(moviesCollection, usersCollection) {
                                                     .toArray();
   
             const totalMovies = await moviesCollection.countDocuments(searchFilter);
-  
+            
+            console.log('User:',req.session.user);
+
             res.status(200).set({'Content-Type': 'text/html'}).render('index', { 
                             movieData,
                             resultCount: totalMovies,
@@ -246,23 +258,24 @@ export function createMovieRouter(moviesCollection, usersCollection) {
         try {
             const { year, rating, sort = '', page = 1, query } = req.query;
             const searchResult = (req.params.query)?.toLowerCase() || "";
-            const itemsPerPage = 15;
+            const itemsPerPage = 20;
             const skip = (page - 1) * itemsPerPage;
             const filterConditions = [];
-            console.log("Filter query:", req.query);
+            console.log("Filter query:", query);
 
             if(query){
                 filterConditions.push({
                     $or: [
-                        { movieName: { $regex: query, $options: 'i' } },
-                        { leadActors: { $elemMatch: { $regex: query, $options: 'i' } } },
-                        { genre: { $regex: query, $options: 'i' } }
+                        { title: { $regex: query, $options: 'i' } },
+                        { cast: { $elemMatch: { $regex: query, $options: 'i' } } },
+                        { genres: { $regex: query, $options: 'i' } },
+                        { directors: { $regex: query, $options: 'i' } }
                     ]
                 });
             }
 
-            if(year) filterConditions.push({ releaseDate: { $regex: year } });
-            if(rating) filterConditions.push({ imdbRating: { $gte: parseFloat(rating) } });
+            if(year) filterConditions.push({ released: { $regex: year } });
+            if(rating) filterConditions.push({ 'imdb.rating': { $gte: parseFloat(rating) } });
 
             const filter = filterConditions.length ? { $and: filterConditions } : {};
 
