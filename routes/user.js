@@ -8,8 +8,8 @@ export function createUserRoutes(usersCollection, moviesCollection){
 
     userRoutes.get('/profile', async (req, res, next) => {
         try{
-            const successMessage = req.session.successMessage || null;
-            const errorMessage = req.session.errorMessage || null;
+            //const successMessage = req.session.successMessage || null;
+            //const errorMessage = req.session.errorMessage || null;
 
             if(!req.session.user) return res.redirect('/login');
 
@@ -19,7 +19,7 @@ export function createUserRoutes(usersCollection, moviesCollection){
                 'Expires': '0'
             });
 
-            const userData = await usersCollection.findOne({ username: req.session.user.username });
+            const userData = await usersCollection.findOne({ email: req.session.user.email });
 
             if(!userData)  return res.status(404).send('User not found');
 
@@ -62,7 +62,7 @@ export function createUserRoutes(usersCollection, moviesCollection){
   
             const { currentPassword, newPassword, confirmNewPassword } = req.body;
 
-            const userData = await usersCollection.findOne({ username: req.session.user.username });
+            const userData = await usersCollection.findOne({ email: req.session.user.email });
 
             if(!currentPassword || !newPassword || !confirmNewPassword){
                 return res.status(400).set({'Content-Type': 'text/html'}).render('change_password', { 
@@ -99,7 +99,7 @@ export function createUserRoutes(usersCollection, moviesCollection){
             const hashedPassword = await bcrypt.hash(newPassword, 10);
 
             await usersCollection.updateOne(
-                                { username: req.session.user.username },
+                                { email: req.session.user.email },
                                 { $set: { password: hashedPassword } }
             );
         
@@ -116,16 +116,22 @@ export function createUserRoutes(usersCollection, moviesCollection){
         try {
             if(!req.session.user) return res.redirect('/login');
   
-            const username = req.session.user.username;
+            const userEmail = req.session.user.email;
   
-            await usersCollection.deleteOne({ username });
+            await usersCollection.deleteOne({ email: userEmail });
+
+            await moviesCollection.updateMany(
+                { 'reviews.email': userEmail },
+                { $set: { 'reviews.$[elem].name': 'Deleted User', 'reviews.$[elem].email': '' }},
+                { arrayFilters: [{ 'elem.email': userEmail }]}
+            );
   
             req.session.destroy(error => {
                 if(error){
                     console.error('Error destroying session:', error);
                 }
                 res.cookie('successMessage', 'Account deleted successfully!', { maxAge: 3000 });
-                res.redirect('/movies');
+                res.redirect('/home');
             });
         } 
         catch(error){
@@ -144,15 +150,15 @@ export function createUserRoutes(usersCollection, moviesCollection){
                 'Expires': '0'
             });
       
-            const username = req.session.user.username;
+            const email = req.session.user.email;
             const page = parseInt(req.query.page) || 1;
             const itemsPerPage = 10;
             const skip = (page - 1) * itemsPerPage;
       
             const pipeline = [
-                { $match: { "reviews.username": username } },
+                { $match: { "reviews.email": email } },
                 { $unwind: "$reviews" },
-                { $match: { "reviews.username": username } },
+                { $match: { "reviews.email": email } },
                 { $sort: { "reviews.date": -1 } },
                 {
                     $facet: {
@@ -163,7 +169,7 @@ export function createUserRoutes(usersCollection, moviesCollection){
                             {
                                 $project: {
                                     movieId: "$_id",
-                                    movieName: "$movieName",
+                                    title: "$title",
                                     comment: "$reviews.comment",
                                     rating: "$reviews.rating",
                                     date: "$reviews.date"
