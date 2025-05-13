@@ -53,7 +53,6 @@ async function connectToDB(){
         const db = client.db(dbName);
         moviesCollection = db.collection('movies');
         usersCollection = db.collection('users');
-        commentsCollection = db.collection('comments');
 
         // Listen for runtime connection issues
         client.on('close', () => {
