@@ -34,7 +34,7 @@ const logger=createLogger({
     ]
 });
 const logAll=function(request,response,next){
-    logger.info(`URL being  requested: ${request.url}`);
+    logger.info(`URL requested: ${request.url}`);
     next();
 }
 app.use(logAll);
@@ -43,8 +43,9 @@ app.use(logAll);
 dotenv.config();
 const uri = process.env.ATLAS_URI;
 const client = new MongoClient(uri);
-const dbName = 'movie_db';
-let moviesCollection, usersCollection;
+const dbName = 'sample_mflix';
+let moviesCollection, usersCollection, commentsCollection;
+
 async function connectToDB(){
     try{
         await client.connect();
@@ -52,6 +53,7 @@ async function connectToDB(){
         const db = client.db(dbName);
         moviesCollection = db.collection('movies');
         usersCollection = db.collection('users');
+        commentsCollection = db.collection('comments');
 
         // Listen for runtime connection issues
         client.on('close', () => {
@@ -92,7 +94,11 @@ app.use((req, res, next) => {
     res.locals.successMessage = req.session.successMessage || null;
     res.locals.errorMessage = req.session.errorMessage || null;
 
-    //console.log('Checking if session has errorMessage:', req.session.errorMessage);//debug
+    //console.log('\nChecking if session has errorMessage:', req.session.errorMessage);//debug
+    //console.log('Checking if session has successMessage:', req.session.successMessage,"\n");//debug
+    //console.log('Session user: ',req.session.user);
+    //console.log('\nChecking if locals has errorMessage:', res.locals.errorMessage);//debug
+    //console.log('Checking if locals has successMessage:', res.locals.successMessage,"\n");//debug
 
     delete req.session.successMessage;
     delete req.session.errorMessage;
@@ -108,19 +114,27 @@ app.use((req, res, next) => {
 // Start server after DB connects
 connectToDB()
 .then(() => {
-    app.get('/', (req, res) => {
-        res.redirect('/movies');
-    });
     
+    //Home
+    app.get('/', (req, res) => {
+        res.redirect('/home');
+    });
+
+    // No Content
+    app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
+        res.status(204).end(); 
+    });
+      
+
     //Routes
-    app.use('/', createMovieRouter(moviesCollection, usersCollection));
+    app.use('/', createMovieRouter(moviesCollection, usersCollection, commentsCollection));
     app.use('/', createFavoritesRoutes(usersCollection, moviesCollection));
     app.use('/', createUserRoutes(usersCollection, moviesCollection));
     app.use('/', createAuthRoutes(usersCollection));
 
     //Server
     app.listen(PORT, () => {
-        console.log(`Server running at port:${PORT}`);
+        console.log(`Server running at http://localhost:${PORT}`);
     });
 
     //Global error handler
@@ -130,7 +144,7 @@ connectToDB()
         if(!res.headersSent){
             req.session.errorMessage = error.message || 'Something went wrong!';
             console.error(req.session.errorMessage);
-            return res.redirect('/movies');
+            return res.redirect('/home');
         }
     
         res.status(500).end();
