@@ -44,7 +44,7 @@ dotenv.config();
 const uri = process.env.ATLAS_URI;
 const client = new MongoClient(uri);
 const dbName = 'sample_mflix';
-let moviesCollection, usersCollection, commentsCollection;
+let moviesCollection, usersCollection;
 
 async function connectToDB(){
     try{
@@ -97,8 +97,6 @@ app.use((req, res, next) => {
     //console.log('\nChecking if session has errorMessage:', req.session.errorMessage);//debug
     //console.log('Checking if session has successMessage:', req.session.successMessage,"\n");//debug
     //console.log('Session user: ',req.session.user);
-    //console.log('\nChecking if locals has errorMessage:', res.locals.errorMessage);//debug
-    //console.log('Checking if locals has successMessage:', res.locals.successMessage,"\n");//debug
 
     delete req.session.successMessage;
     delete req.session.errorMessage;
