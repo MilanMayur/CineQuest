@@ -124,7 +124,7 @@ connectToDB()
       
 
     //Routes
-    app.use('/', createMovieRouter(moviesCollection, usersCollection, commentsCollection));
+    app.use('/', createMovieRouter(moviesCollection, usersCollection));
     app.use('/', createFavoritesRoutes(usersCollection, moviesCollection));
     app.use('/', createUserRoutes(usersCollection, moviesCollection));
     app.use('/', createAuthRoutes(usersCollection));
