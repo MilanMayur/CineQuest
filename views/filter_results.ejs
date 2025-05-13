@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Filtered Movies</title>
+        <link rel="stylesheet" type="text/css" href="/styles.css">
+        <link rel="icon" href="/cinequest.png" type="image/png">
+        <div id="css-test" style="display: none;"></div>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Filtered Results</h1>
+            <div class="search-box">
+                <a href="/home" class="home-button">Home</a>
+                <input type="text" 
+                    id="searchInput" 
+                    placeholder="Search by title, actor, genre..." 
+                    oninput="document.getElementById('search-button').disabled = !this.value.trim()" 
+                    onkeydown="handleEnterKey(event)"/>
+                <button id="search-button" disabled 
+                    onclick="window.location.href = '/search/' + 
+                    encodeURIComponent(document.getElementById('searchInput').value.trim())">
+                    Search
+                </button>
+            </div>
+
+            <div class="filters">
+                <label>Release Year:
+                    <input type="number" id="yearFilter" placeholder="e.g. 2020" min="0">
+                </label>
+                <label>Minimum IMDb Rating:
+                    <input type="number" step="0.1" id="ratingFilter" placeholder="e.g. 7.5" min="0" max="10">
+                </label>
+                <button id="applyFilterButton" onclick="applyFilters()">Apply Filters</button>
+                <a href="/movies" class="clear-filter">Clear Filters</a>  
+            </div>
+
+            <% if(fromFilter){ %>
+                <p class="result-count"><strong><%= resultCount %></strong> result(s) found</p>
+            <% } %>
+
+            <!-- Movie Grid -->
+            <% if(movieData.length > 0){ %>
+                <div class="movie-grid">
+                    <% movieData.forEach(movie => { %>
+                        <div class="movie-card">
+                            <a href="/movie/<%= movie._id %>">
+                                <img src="<%= movie.poster?.startsWith('http') ? movie.poster : '/image_not_found.png' %>" 
+                                    alt="<%= movie.title %>" 
+                                    onerror="this.src='/image_not_found.png';">
+                                <h2><%= movie.title %></h2>
+                                <p><strong>IMDb:</strong> <%= movie.imdb?.rating || 'N/A' %></p>
+                            </a>
+                        </div>
+                    <% }); %>
+                </div>
+
+                    <!-- Pagination -->
+                <% if(totalPages > 1){ %>
+                    <div class="pagination">
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <a href="/filter?year=<%= year %>&rating=<%= rating %>&page=<%= i %>" 
+                               class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } else{ %>
+                <p class="no-results">No results found. Try adjusting your filters.</p>
+            <% } %>
+        </div>
+        <script type="module">
+            import { handleEnterKey, applyFilters, checkAndReloadCSS } from '/functions.js';
+
+            checkAndReloadCSS();
+
+            document.getElementById('searchInput')?.addEventListener('keydown', handleEnterKey);
+            document.getElementById('applyFilterButton')?.addEventListener('click', applyFilters);
+        </script>
+    </body>
+</html>

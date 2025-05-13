@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%= movie.movieName %> - Details</title>
+        <link rel="stylesheet" type="text/css" href="/styles.css">
+        <link rel="icon" href="/cinequest.png" type="image/png">
+        <div id="css-test" style="display: none;"></div>
+        <script>
+            if(localStorage.getItem('darkMode') === 'true'){
+              document.documentElement.classList.add('dark-mode');
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container">
+
+            <!-- Logo Title Profile -->
+            <div class="header">
+                <div class="logo">
+                    <a href="/home">
+                        <img src="/cinequest.png" 
+                            alt="cinequest_logo">
+                    </a>
+                </div>
+                <div class="text">
+                    <h1>CineQuest</h1>
+                    <h4>Movies Beyond Imagination</h4>
+                </div>
+                <button id="darkModeToggle" class="dark-mode-button">🌙</button>
+
+                <!-- Login/Signup -->
+                <div class="auth-button">
+                    <% if(user){ %>
+                        <div class="profile-dropdown">
+                            <div class="profile-header">
+                                <img src="/user_icon.png" alt="User Icon" class="user-icon">
+                                <span><%= user.name %></span>
+                                <i class="arrow-down"></i>
+                            </div>
+                            <div class="dropdown-content">
+                                <a href="/profile">Profile Settings</a>
+                                <a href="/favorites">Favorites</a>
+                                <a href="/my-reviews">My Reviews</a>
+                                <a href="/logout">Logout</a>
+                            </div>
+                        </div>
+                    <% } 
+                    else{ %>
+                        <form action="/login" method="GET" style="display: inline;">
+                            <button type="submit" class="login-button">Login / Signup</button>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-box">
+                <a href="/home" class="home-button">Home</a>
+                <form action="/search" 
+                        method="GET" 
+                        class="movie-search-bar" 
+                        onsubmit="return validateSearchForm()">
+                    <input type="text" 
+                            id="searchQuery"
+                            name="query" 
+                            placeholder="Search by title, actor, genre...">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+
+            <!-- Movie Details -->
+            <div class="movie-details-full">
+                <img src="<%= movie.poster || '/image_not_found.png' %>" alt="<%= movie.title %>">
+                <h1><%= movie.title %></h1>
+
+                <!-- Add to fav -->
+                <% if(user){ %>
+                    <form id="favForm" style="margin: 5px 0;">
+                        <input type="hidden" 
+                                name="movieId" 
+                                value="<%= movie._id.toString() %>">
+                        <input type="hidden" id="actionType" name="actionType" 
+                                value="<%= alreadyFavorited ? 'remove' : 'add' %>">
+                        <% if(alreadyFavorited){ %>
+                            <button type="submit" id="favButton" 
+                                class="favorites-button">✅ Remove from Favorites
+                            </button>
+                        <% } 
+                        else{ %>
+                            <button type="submit" id="favButton" 
+                                class="favorites-button">⭐ Add to Favorites
+                            </button>
+                        <% } %>
+                    </form>
+                <% } %>
+
+                <!-- Movie info -->
+                <div class="movie-info">
+                    <p><strong>Language:</strong> <%= movie.languages?.join(', ') %></p>
+                    <p><strong>Genre:</strong> <%= movie.genres?.join(', ') %></p>
+                    <p><strong>Runtime:</strong> <%= movie.runtime %> minutes</p>
+                    <p><strong>Released:</strong> <%= movie.released ? new Date(movie.released).toDateString() : 'N/A' %></p>
+                    <p><strong>Cast:</strong> <%= movie.cast?.join(', ') %></p>
+                    <p><strong>Director(s):</strong> <%= movie.directors?.join(', ') %></p>
+                    <p><strong>IMDB Rating:</strong> <%= movie.imdb?.rating || 'N/A' %> (<%= movie.imdb?.votes || 0 %> votes)</p>
+                    <p><strong>Tomatoes Viewer Rating:</strong> <%= movie.tomatoes?.viewer?.rating || 'N/A' %></p>
+                    <p><strong>Critic Rating:</strong> <%= movie.tomatoes?.critic?.rating || 'N/A' %></p>
+                </div>
+                <div class="movie-description">
+                    <label><strong>Description:</strong></label>
+                    <p><%= movie.fullplot || movie.plot || 'No description available.' %></p>
+                </div>
+
+                <!-- User review form -->
+                <% if(user){ %>
+                    <form action="/movies/<%= movie._id %>/review" method="POST" 
+                        class="review-form" autocomplete="off">
+                        <label> Your Rating:</label>
+                        <div class="star-rating">
+                            <input type="hidden" 
+                                    name="rating" 
+                                    id="ratingInput" 
+                                    value="0" 
+                                    autocomplete="off">
+                            <% for(let i = 1; i <= 5; i++){ %>
+                                <button type="button" class="star" data-value="<%= i %>">★</button>
+                            <% } %>
+                        </div>
+                        <label for="reviewText">Your Review:</label>
+                            <textarea name="review" 
+                                        id="reviewText" 
+                                        rows="5" 
+                                        maxlength="500"  
+                                        autocomplete="off" required></textarea>
+                        <div class="submit-container">
+                            <button type="submit">Submit Review</button>
+                        </div>
+                    </form>
+                <% } %>
+
+                <!-- Messages -->
+                <div id="messages">
+                    <% if(successMessage){ %>
+                        <div class="success-message"><%= successMessage %></div>
+                    <% } %>
+                    <% if(errorMessage){ %>
+                        <div class="error-message"><%= errorMessage %></div>
+                    <% } %>
+    
+                    <% if(successMessage || errorMessage){ %>
+                    <script>
+                        window.history.replaceState(null, '', window.location.pathname);
+                    </script>
+                    <% } %>
+                </div>
+                
+                <!-- Reviews display -->
+                <div class="reviews-section">
+                    <h3>User Reviews</h3>
+                    <% movie.reviews?.forEach(function(review, index){ %>
+                        <div class="review">
+                            <div class="review-header">
+                                <div class="review-user">
+                                    <strong><%= review.name %></strong> - <%= review.rating %>/5★
+                                </div>
+                                <div class="review-time">
+                                    <small><%= new Date(review.date).toLocaleString() %></small>
+                                    <% if (user && user.name === review.name) { %>
+                                        <form action="/movies/<%= movie._id %>/review/delete" 
+                                            method="POST" class="delete-review-form">
+                                            <input type="hidden" 
+                                                    name="reviewIndex" 
+                                                    value="<%= index %>">
+                                            <button type="submit" class="delete-button" 
+                                                    title="Delete Review">🗑️</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <p><%= review.comment %></p>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+            <button class="back-button" onclick="window.location.href='<%= backUrl %>'">← Back</button>
+        </div>
+        <script type="module"> 
+            import { toggleDarkMode, setupStarRating, autoHideMessages, 
+                    setupFavoritesButton, validateSearchForm, goBack, 
+                    checkAndReloadCSS } from "/functions.js";
+            
+            toggleDarkMode();
+            setupStarRating();
+            autoHideMessages();
+            checkAndReloadCSS();
+            setupFavoritesButton();
+
+            window.validateSearchForm = validateSearchForm;
+            window.goBack = goBack;
+        </script>
+    </body>
+</html>
