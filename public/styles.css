@@ -7,6 +7,7 @@ body {
     margin: 0;
     padding: 0;
 }
+
 .container {
     max-width: 1200px;
     margin: auto;
@@ -15,6 +16,11 @@ body {
 #css-test {
     position: absolute;
     width: 123px;
+}
+
+/* Pages */
+.page-body {
+    min-height: 1000px;
 }
 
 /* Header */
@@ -153,7 +159,7 @@ body {
 
 /* Login/Signup Page */
 .form-container {
-    margin: 100px auto 0;
+    margin: 200px auto 0;
     max-width: 500px;
     background-color: #333;
     padding: 30px 40px;
@@ -501,7 +507,7 @@ textarea {
     padding-bottom: 10px;
 }
 .review {
-    margin-top: 20px;
+    margin-top: 30px;
     background-color: #fff;
     border-left: 5px solid #ff6600;
     margin-bottom: 20px;
@@ -609,9 +615,9 @@ textarea {
 /* Profile Page*/
 .profile-container {
     max-width: 600px;
-    margin: 50px auto;
+    margin: 70px auto;
     background: #333;
-    padding: 30px;
+    padding: 30px 100px 30px 100px;
     border-radius: 10px;
     color: white;
     text-align: center;
@@ -625,6 +631,14 @@ textarea {
 }
 .profile-actions {
     margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+}
+.profile-actions2 {
+    margin-top: 30px;
+    margin-left: 160px;
+    margin-right: 160px;
     display: flex;
     justify-content: center;
     gap: 25px;
@@ -662,6 +676,22 @@ textarea {
 }
 
 /* Change Password Page */
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.form-group label {
+    flex: 1;
+    text-align: left;
+}
+.form-group input {
+    flex: 2;
+    text-align: right;
+    padding: 5px;
+    max-width: 250px;
+}
 .form-container label{
     color: white;
     margin-right: 20px;
@@ -677,11 +707,6 @@ textarea {
     text-decoration: none;
     border-radius: 5px;
     cursor: pointer;
-}
-
-/* Favorites Page */
-.favorites {
-    min-height: 800px;
 }
 
 /* Error Message */
