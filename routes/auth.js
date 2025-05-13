@@ -35,28 +35,36 @@ export function createAuthRoutes(usersCollection) {
         }
         catch(error){
             req.session.errorMessage = 'Error signing up!!';
-            res.status(500).redirect('/movies');
+            res.status(500).redirect('/home');
         }
     });
 
     authRoutes.post('/login', async (req, res, next) => {
         try{
-            const { username, password } = req.body;
-            const user = await usersCollection.findOne({ username });
+            const { identifier, password } = req.body;
+            const user = await usersCollection.findOne({
+                $or: [
+                    { name: identifier },
+                    { email: identifier }
+                ]
+            });
 
             if(!user){
                 return res.render('login', { 
-                            errorMessage: 'User not found. Please sign up.' });
+                            errorMessage: 'Email or Username not found. Please sign up.' });
             }
   
             if(user && await bcrypt.compare(password, user.password)){
-                req.session.user = { username: user.username };
+                req.session.user = { name: user.name, email: user.email };
+                
+                console.log('Session started- user: ', req.session.user);//debug
+
                 req.session.successMessage = 'Logged in successfully!';
-                return res.redirect('/movies');
+                return res.redirect('/home');
             }
 
             res.render('login', { 
-                        errorMessage: 'Login failed. Wrong username or password. Try again'
+                        errorMessage: 'Login failed. Wrong email or password. Try again'
                     });
         }
         catch(error){
@@ -67,12 +75,18 @@ export function createAuthRoutes(usersCollection) {
 
     authRoutes.post('/signup', async (req, res, next) => {
         try{
-            const { username, password, confirmPassword } = req.body;
-            const usernameRegex = /^[a-zA-Z][a-zA-Z0-9]{2,9}$/;
+            const { name, email, password, confirmPassword } = req.body;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-            if(!usernameRegex.test(username)){
-                return res.status(400).render('signup', { 
-                    errorMessage: 'Username must start with a letter and only contain letters and numbers (3-10 characters).' 
+            if(!name || name.length < 2 ){
+                return res.status(400).render('signup', {
+                    errorMessage: 'Username must be at least 2 characters long.'
+                });
+            }
+
+            if(!emailRegex.test(email)){
+                return res.status(400).render('signup', {
+                    errorMessage: 'Invalid email format.'
                 });
             }
 
@@ -88,23 +102,36 @@ export function createAuthRoutes(usersCollection) {
                 });
             }
 
-            const userExists = await usersCollection.findOne({ username });
+            const emailExists = await usersCollection.findOne({ email });
+            const userExists = await usersCollection.findOne({ name });
+
+            if(emailExists){
+                return res.status(400).render('signup', { 
+                    errorMessage: 'Email exists please Login.' 
+                });
+            }
 
             if(userExists){
                 return res.status(400).render('signup', { 
-                    errorMessage: 'User already exists.' 
+                    errorMessage: 'Username already taken.' 
                 });
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
 
             await usersCollection.insertOne({
-                                    username,
+                                    name,
+                                    email,
                                     password: hashedPassword
             });
 
-            req.session.user = { username };
-            res.redirect('/movies');
+            req.session.user = { name, email };
+
+            //console.log('Session started- user: ', name);//debug
+
+            res.render('home', {
+                successMessage: 'Successfully signed in!'
+            });
         }
         catch(error){
             error.message = 'Error signing up!!';
@@ -119,10 +146,12 @@ export function createAuthRoutes(usersCollection) {
                 'Pragma': 'no-cache',
                 'Expires': '0'
             });
+
+            //console.log('Session ended- user: ', req.session.user);//debug
             
             res.cookie('successMessage', 'Logged out successfully!', { maxAge: 3000 });
             req.session.destroy();
-            res.redirect('/movies');
+            res.redirect('/home');
         }
         catch(error){
             error.message = 'Error logging out!!';
