@@ -278,7 +278,7 @@ export function createMovieRouter(moviesCollection, usersCollection) {
             if(rating){
                 filterConditions.push({
                     $and: [
-                        { 'imdb.rating': { $ne: 'N/A' } },
+                        { 'imdb.rating': { $ne: '' } },
                         { $expr: { $gte: [
                                 { $toDouble: '$imdb.rating' },
                                 parseFloat(rating) ]}}
