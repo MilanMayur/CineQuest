@@ -14,70 +14,71 @@
     </head>
     <body>
         <div class="container">
+            <div class="page-body">
 
-            <!-- Logo & Tilte -->
-            <div class="header">
-                <div class="logo">
-                    <a href="/movies">
-                    <img src="/cinequest.png" alt="cinequest_logo">
-                    </a>
-                </div>
-                <div class="text">
-                    <h1>My Reviews</h1>
-                </div>
-                <button id="darkModeToggle" class="dark-mode-button">🌙</button>
+                <!-- Logo & Tilte -->
+                <div class="header">
+                    <div class="logo">
+                        <a href="/home">
+                        <img src="/cinequest.png" alt="cinequest_logo">
+                        </a>
+                    </div>
+                    <div class="text">
+                        <h1>My Reviews</h1>
+                    </div>
+                    <button id="darkModeToggle" class="dark-mode-button">🌙</button>
 
-                <!-- Profile -->
-                <div class="auth-button">
-                    <% if(user){ %>                       
-                        <div class="profile-dropdown">
-                            <div class="profile-header">
-                                <img src="/user_icon.png" alt="User Icon" class="user-icon">
-                                <span><%= user.username %></span>
-                                <i class="arrow-down"></i>
+                    <!-- Profile -->
+                    <div class="auth-button">
+                        <% if(user){ %>                       
+                            <div class="profile-dropdown">
+                                <div class="profile-header">
+                                    <img src="/user_icon.png" alt="User Icon" class="user-icon">
+                                    <span><%= user.name %></span>
+                                    <i class="arrow-down"></i>
+                                </div>
+                                <div class="dropdown-content">
+                                    <a href="/profile">Profile Settings</a>
+                                    <a href="/favorites">Favorites</a>
+                                    <a href="/my-reviews">My Reviews</a>
+                                    <a href="/logout">Logout</a>
+                                </div>
                             </div>
-                            <div class="dropdown-content">
-                                <a href="/profile">Profile Settings</a>
-                                <a href="/favorites">Favorites</a>
-                                <a href="/my-reviews">My Reviews</a>
-                                <a href="/logout">Logout</a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Reviews -->
+                <div class="reviews">
+                    <% if(userReviews.length > 0){ %>
+                        <% userReviews.forEach(review => { %>
+                            <div class="review">
+                                <div class="review-header">
+                                    <div class="review-user">
+                                        <strong><%= review.title %></strong> - <%= review.rating %>/5★
+                                    </div>
+                                    <div class="review-time">
+                                        <small><%= new Date(review.date).toLocaleString() %></small>
+                                    </div>
+                                </div>
+                                <p><%= review.comment %></p>
+                                <a href="/movie/<%= review.movieId %>" class="view-movie-button">View Movie</a>
                             </div>
-                        </div>
+                        <% }); %>
+                    <% }else{ %>
+                    <p>You haven't posted any reviews yet.</p>
                     <% } %>
                 </div>
-            </div>
 
-            <!-- Reviews -->
-            <div class="reviews">
-                <% if(userReviews.length > 0){ %>
-                    <% userReviews.forEach(review => { %>
-                        <div class="review">
-                            <div class="review-header">
-                                <div class="review-user">
-                                    <strong><%= review.movieName %></strong> - <%= review.rating %>/5★
-                                </div>
-                                <div class="review-time">
-                                    <small><%= new Date(review.date).toLocaleString() %></small>
-                                </div>
-                            </div>
-                            <p><%= review.comment %></p>
-                            <a href="/movie/<%= review.movieId %>" class="view-movie-button">View Movie</a>
-                        </div>
-                    <% }); %>
-                <% }else{ %>
-                <p>You haven't posted any reviews yet.</p>
+                <!-- Pagination -->
+                <% if(totalPages > 1){ %>
+                    <div class="pagination">
+                        <% for(let i = 1; i <= totalPages; i++){ %>
+                            <a href="/my-reviews?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                        <% } %>
+                    </div>
                 <% } %>
             </div>
-
-            <!-- Pagination -->
-            <% if(totalPages > 1){ %>
-                <div class="pagination">
-                    <% for(let i = 1; i <= totalPages; i++){ %>
-                        <a href="/my-reviews?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
-                    <% } %>
-                </div>
-            <% } %>
-
             <button class="back-button" onclick="goBack()">← Back</button>
         </div>
         <script type="module"> 
