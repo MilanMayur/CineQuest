@@ -10,7 +10,7 @@
         <div class="container">
             <h1>Filtered Results</h1>
             <div class="search-box">
-                <a href="/movies" class="home-button">Home</a>
+                <a href="/home" class="home-button">Home</a>
                 <input type="text" 
                     id="searchInput" 
                     placeholder="Search by title, actor, genre..." 
@@ -19,7 +19,8 @@
                 <button id="search-button" disabled 
                     onclick="window.location.href = '/search/' + 
                     encodeURIComponent(document.getElementById('searchInput').value.trim())">
-                    Search</button>
+                    Search
+                </button>
             </div>
 
             <div class="filters">
@@ -43,8 +44,11 @@
                     <% movieData.forEach(movie => { %>
                         <div class="movie-card">
                             <a href="/movie/<%= movie._id %>">
-                                <img src="<%= movie.image %>" alt="Movie Image" onerror="this.src='/image_not_found.png';">
-                                <h2><%= movie.movieName %></h2>
+                                <img src="<%= movie.poster?.startsWith('http') ? movie.poster : '/image_not_found.png' %>" 
+                                    alt="<%= movie.title %>" 
+                                    onerror="this.src='/image_not_found.png';">
+                                <h2><%= movie.title %></h2>
+                                <p><strong>IMDb:</strong> <%= movie.imdb?.rating || 'N/A' %></p>
                             </a>
                         </div>
                     <% }); %>
@@ -63,7 +67,7 @@
                 <p class="no-results">No results found. Try adjusting your filters.</p>
             <% } %>
         </div>
-        <script>
+        <script type="module">
             import { handleEnterKey, applyFilters, checkAndReloadCSS } from '/functions.js';
 
             checkAndReloadCSS();
