@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import { getSortOption } from '../utils/utils.js';
 
 
-export function createMovieRouter(moviesCollection, usersCollection, commentsCollection) {
+export function createMovieRouter(moviesCollection, usersCollection) {
     
     const movieRoutes = express.Router();
 
