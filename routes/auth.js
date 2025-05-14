@@ -129,7 +129,7 @@ export function createAuthRoutes(usersCollection) {
 
             //console.log('Session started- user: ', name);//debug
 
-            res.render('home', {
+            res.render('index', {
                 successMessage: 'Successfully signed in!'
             });
         }
