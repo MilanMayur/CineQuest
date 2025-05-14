@@ -128,11 +128,9 @@ export function createAuthRoutes(usersCollection) {
             req.session.user = { name, email };
 
             //console.log('Session started- user: ', name);//debug
+            
             req.session.successMessage = 'Successfully signed in!';
             res.redirect('/home');
-            /*res.render('index', {
-                successMessage: 'Successfully signed in!'
-            });*/
         }
         catch(error){
             error.message = 'Error signing up!!';
