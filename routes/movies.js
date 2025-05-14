@@ -275,14 +275,8 @@ export function createMovieRouter(moviesCollection, usersCollection) {
             }
 
             if(year) filterConditions.push({ released: { $regex: year } });
-            if(rating){
-                filterConditions.push({
-                    'imdb.rating': { not: { $in: ['', 'N/A', null] },
-                                     $gte: rating
-                                   }
-                });
-            }
-
+            if(rating) filterConditions.push({ 'imdb.rating': { $gte: parseFloat(rating) }});
+            
             const filter = filterConditions.length ? { $and: filterConditions } : {};
 
             const sortOption = getSortOption(sort);
