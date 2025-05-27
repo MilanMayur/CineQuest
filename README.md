@@ -3,6 +3,8 @@ CineQuest is a movie discovery app where users can explore, search, and filter m
 
 ## Check website--> https://cinequest.onrender.com
 
+![Screenshot (67)1](https://github.com/user-attachments/assets/4f1a3a2c-0461-490d-9476-17b7fe88986a)
+
 ## 🚀 Features
 
 - 🔍 Search movies by title, actor, genre
@@ -29,7 +31,7 @@ CineQuest is a movie discovery app where users can explore, search, and filter m
 1. **Clone the repository**
 2. **Install dependencies**
 3. **Set up environment variables:**
-   ATLAS_URI=mongodb+srv://your-user:your-password@your-cluster.mongodb.net/movie_db
+   ATLAS_URI=mongodb+srv://your-user:your-password@your-cluster.mongodb.net/movie_database
 4. **Run the application**
 
 ## Project Structure
