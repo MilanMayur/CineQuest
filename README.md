@@ -4,6 +4,7 @@ CineQuest is a movie discovery app where users can explore, search, and filter m
 ## Check website--> https://cinequest.onrender.com
 
 ![Screenshot (67)1](https://github.com/user-attachments/assets/4f1a3a2c-0461-490d-9476-17b7fe88986a)
+![Screenshot (69)1](https://github.com/user-attachments/assets/17e490c4-ca71-44ae-9fa3-3a8af36e9ad2)
 
 ## 🚀 Features
 
