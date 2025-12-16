@@ -36,17 +36,12 @@ CineQuest is a movie discovery app where users can explore, search, and filter m
 4. **Run the application**
 
 ## Project Structure
-
+```
 ├── routes/               # Route files (auth, movies, user, favorites)
-
 ├── views/                # EJS templates
-
 ├── public/               # Static assets (styles.css, JS, images)
-
 ├── utils/                # Utility functions (e.g., sorting)
-
 ├── server.mjs            # App entry point
-
 ├── .env                  # Environment variables
-
 ├── package.json
+```
