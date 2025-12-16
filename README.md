@@ -1,7 +1,7 @@
 # 🎬 CineQuest
 CineQuest is a movie discovery app where users can explore, search, and filter movies, submit ratings and reviews, and manage favorites. With user profiles, dark mode, and personalized features, CineQuest offers a fun and interactive way to find and track your favorite films.
 
-## Check website--> https://cinequest.onrender.com
+## Check website--> https://cinequest.onrender.com (not live)
 
 ![Screenshot (67)1](https://github.com/user-attachments/assets/4f1a3a2c-0461-490d-9476-17b7fe88986a)
 ![Screenshot (69)1](https://github.com/user-attachments/assets/17e490c4-ca71-44ae-9fa3-3a8af36e9ad2)
@@ -37,6 +37,7 @@ CineQuest is a movie discovery app where users can explore, search, and filter m
 
 ## Project Structure
 ```
+CineQuest/
 ├── routes/               # Route files (auth, movies, user, favorites)
 ├── views/                # EJS templates
 ├── public/               # Static assets (styles.css, JS, images)
